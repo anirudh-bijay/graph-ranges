@@ -1,0 +1,2 @@
+# Ensure GitHub recognises .h files as C++ headers
+*.h linguist-language=C++
