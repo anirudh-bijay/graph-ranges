@@ -19,6 +19,9 @@
 
 namespace graph
 {
+    /// @brief This namespace contains implementation details for the
+    ///        @c `graph` library. It is not intended for use by
+    ///        end-users and may change without notice.
     namespace detail
     {
         /// @brief Helper function for @c `graph::detail::iterator_concept`.
@@ -62,9 +65,11 @@ namespace graph
                 static_assert(std::input_or_output_iterator <Iterator>, "'Iterator' is not an iterator");
         }
 
-        /// @brief The iterator concept
-        ///        tag to use inside the class definition of @c `Iterator` or for
-        ///        specialising @c `std::iterator_traits <Iterator>`.
+        /// @brief The iterator concept tag for the iterator type
+        ///        corresponding to the standard iterator concept satisfied
+        ///        by the type, unless overridden by a member typedef or
+        ///        explicit specialisation of
+        ///        @c `std::iterator_traits <Iterator>`.
         /// 
         /// @tparam Iterator An iterator type.
         /// 
@@ -76,30 +81,6 @@ namespace graph
         template <class Iterator>
         using iterator_concept = decltype(get_iterator_concept <Iterator>());
         
-        /// @brief Implementation of the exposition-only helper concept
-        ///        @e `simple-view` as defined in the C++26 standard (section
-        ///        [range.utility.helpers]).
-        /// 
-        /// #### Implementation
-        /// 
-        /// The implementation is the same as that laid down in the
-        /// Standard, save for the concept name.
-        /// 
-        /// ```c++
-        /// template <class Range>
-        /// concept simple_view
-        ///     = std::ranges::view <Range>
-        ///     && std::ranges::range <const Range>
-        ///     && std::same_as <std::ranges::iterator_t <Range>, std::ranges::iterator_t <const Range> >
-        ///     && std::same_as <std::ranges::sentinel_t <Range>, std::ranges::sentinel_t <const Range> >;
-        /// ```
-        template <class Range>
-        concept simple_view
-            = std::ranges::view <Range>
-            && std::ranges::range <const Range>
-            && std::same_as <std::ranges::iterator_t <Range>, std::ranges::iterator_t <const Range> >
-            && std::same_as <std::ranges::sentinel_t <Range>, std::ranges::sentinel_t <const Range> >;
-
     } // namespace detail
 
 } // namespace graph
@@ -274,6 +255,13 @@ namespace graph::detail
         template <class R>
         ref_view(R&) -> ref_view <R>;
 
+        /// @brief This namespace contains "fixes" to some aspects of the
+        ///        @c `<ranges>` library defined in the C++26 standard
+        ///        that do not sit well with the codebase due to apparently
+        ///        insane design.
+        /// 
+        ///        It also contains some exposition-only (helper) concepts
+        ///        defined in the C++26 standard.
         namespace views
         {
             namespace detail
@@ -309,6 +297,18 @@ namespace graph::detail
                         }
 
                     public:
+                        /// @brief Return a view of all elements of the range
+                        ///        @c `r`.
+                        ///
+                        ///        If @c `std::decay_t <Range>` is a view, it
+                        ///        is returned unchanged. Else, if @c `Range`
+                        ///        is a range, a view of type
+                        ///        @c `graph::detail::views::all_t <Range>`
+                        ///        is returned.
+                        ///
+                        /// @tparam Range Type of the range to be converted.
+                        /// @param r Range to convert to a view.
+                        /// @return 
                         template <std::ranges::viewable_range Range>
                             requires std::ranges::view <std::decay_t <Range> >
                             || (can_form_ref_view <Range>())
@@ -347,6 +347,13 @@ namespace graph::detail
 
     } // namespace ranges
 
+    /// @brief This namespace contains "fixes" to some aspects of the
+    ///        @c `<ranges>` library defined in the C++26 standard
+    ///        that do not sit well with the codebase due to apparently
+    ///        insane design.
+    /// 
+    ///        It also contains some exposition-only (helper) concepts
+    ///        defined in the C++26 standard.
     namespace views
     {
         using namespace ranges::views;

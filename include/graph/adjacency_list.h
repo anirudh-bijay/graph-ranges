@@ -642,7 +642,7 @@ namespace graph
             constexpr vertex_view() requires std::default_initializable <V> = default;
             explicit constexpr vertex_view(V view) : view(std::move(view)) {}
             
-            constexpr auto begin() requires (!detail::simple_view <V>)
+            constexpr auto begin() requires (!detail::ranges::simple_view <V>)
             {
                 return iterator_impl <false>{std::ranges::begin(view)};
             }
@@ -652,7 +652,7 @@ namespace graph
                 return iterator_impl <true>{std::ranges::begin(view)};
             }
 
-            constexpr auto end() requires (!detail::simple_view <V>)
+            constexpr auto end() requires (!detail::ranges::simple_view <V>)
             {
                 if constexpr (std::ranges::common_range <V>)
                     return iterator_impl <false>{std::ranges::end(view)};
@@ -999,7 +999,7 @@ namespace graph
             explicit constexpr outedge_view(Iter tail_iter)
                 : tail_iter{tail_iter}, children_view{std::get <1>(std::get <1>(*tail_iter))} {}
 
-            constexpr auto begin() requires (!detail::simple_view <V>)
+            constexpr auto begin() requires (!detail::ranges::simple_view <V>)
             {
                 return iterator_impl <false>{tail_iter, std::ranges::begin(children_view)};
             }
@@ -1009,7 +1009,7 @@ namespace graph
                 return iterator_impl <true>{tail_iter, std::ranges::begin(children_view)};
             }
 
-            constexpr auto end() requires (!detail::simple_view <V>)
+            constexpr auto end() requires (!detail::ranges::simple_view <V>)
             {
                 return iterator_impl <false>{tail_iter, std::ranges::end(children_view)};
             }
