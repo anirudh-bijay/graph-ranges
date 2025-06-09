@@ -64,11 +64,10 @@ namespace graph
             vertex_state.insert({std::get <0>(v_value), unvisited});
         }
 
-        auto u = root;
-        stack.push(u);
+        stack.push(root);
 
         do {
-            u = stack.top();
+            const auto& u = stack.top();
             auto& vertex_state_ref = vertex_state[u];
 
             switch (vertex_state[u]) {
@@ -86,8 +85,8 @@ namespace graph
                     break;
 
                 case inside_subtree:
-                    stack.pop();
                     co_yield u;
+                    stack.pop(); // Scheduled after yielding to prevent a dangling reference.
 
                     vertex_state_ref = subtree_visited;
                     break;
@@ -168,11 +167,10 @@ namespace graph
             vertex_state.insert({std::get <0>(v_value), unvisited});
         }
 
-        auto u = root;
-        stack.push(u);
+        stack.push(root);
 
         do {
-            u = stack.top();
+            const auto& u = stack.top();
             auto& vertex_state_ref = vertex_state[u];
 
             switch (vertex_state[u]) {
@@ -239,11 +237,10 @@ namespace graph
             vertex_state.insert({std::get <0>(v_value), unvisited});
         }
 
-        auto u = root;
-        stack.push(u);
+        stack.push(root);
 
         do {
-            u = stack.top();
+            const auto& u = stack.top();
             auto& vertex_state_ref = vertex_state[u];
 
             switch (vertex_state[u]) {
@@ -259,8 +256,8 @@ namespace graph
                     break;
 
                 case inside_subtree:
-                    stack.pop();
                     co_yield u;
+                    stack.pop(); // Scheduled after yielding to prevent a dangling reference.
 
                     vertex_state_ref = subtree_visited;
                     break;
