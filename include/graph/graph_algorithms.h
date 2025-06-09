@@ -7,3 +7,4 @@
 #pragma once
 
 #include "detail/depth_first.h"
+#include "detail/breadth_first.h"
