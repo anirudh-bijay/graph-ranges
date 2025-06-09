@@ -21,5 +21,5 @@ This library requires C++23 or greater.
 
 Currently, this library is only expositional. It implements only an
 adjacency list graph representation and provides algorithms only for
-depth-first traversal. However, it already demonstrates the features
-described above.
+depth-first and breadth-first traversals. However, it already
+demonstrates the features described above.
