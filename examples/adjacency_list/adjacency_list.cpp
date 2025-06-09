@@ -101,4 +101,14 @@ int main()
     }
 
     std::cout << '\n';
+
+    /// @section Breadth-first traversal
+
+    std::cout << "\nVertices breadth-first with A as root:\n\n";
+
+    for (const auto& u : graph::get_vertices_breadth_first(G, 1)) {
+        std::cout << std::get <1>(*G.find_vertex(u)) << ' ';
+    }
+
+    std::cout << '\n';
 }
