@@ -23,6 +23,12 @@
 #include <utility>
 #include <vector>
 
+#if __cpp_lib_ranges >= 202202L
+
+#include <ranges>
+
+#endif
+
 namespace dat
 {
     template <
@@ -97,6 +103,25 @@ namespace dat
 
             constexpr direct_address_table(std::initializer_list <value_type> ilist)
                 : direct_address_table(ilist.begin(), ilist.end()) {}
+
+#if __cpp_lib_containers_ranges >= 202202L
+
+            template <std::ranges::input_range R>
+                requires std::convertible_to <std::ranges::range_reference_t <R>, value_type>
+            constexpr direct_address_table(std::from_range_t, R&& range)
+            {
+                insert_range(std::forward <R>(range));
+            }
+
+#endif
+
+            constexpr direct_address_table&
+            operator=(std::initializer_list <value_type> ilist)
+            {
+                clear();
+                insert(ilist.begin(), ilist.end());
+                return *this;
+            }
 
             template <std::input_iterator InputIt>
             constexpr void insert(InputIt first, const InputIt last)
@@ -221,9 +246,52 @@ namespace dat
                 }
             }
 
-            constexpr iterator erase(const iterator pos)
+#if __cpp_lib_containers_ranges >= 202202L
+
+            template <std::ranges::input_range R>
+                requires std::convertible_to <std::ranges::range_reference_t <R>, value_type>
+            constexpr void insert_range(R&& range)
             {
-                const auto next_pos = std::next(pos);
+                if constexpr (std::ranges::forward_range <R>) {
+                    /// Avoid multiple reallocations by determining the maximum
+                    /// key value beforehand, then performing a single
+                    /// reallocation if necessary.
+
+                    const key_type max_key = value_type(*std::ranges::max_element(
+                        range, [](const value_type& l, const value_type& r) {
+                            return l.first < r.first;
+                        })
+                    ).first;
+
+                    const size_type new_size = mapped_container.size() > max_key + 1
+                        ? mapped_container.size()
+                        : max_key + 1;
+
+                    mapped_container.resize(new_size);
+                    occupied.resize(new_size, false);
+
+                    for (auto&& elem : std::forward <R>(range)) {
+                        value_type value(elem);
+                        mapped_container[value.first] = value.second;
+                        if (!occupied[value.first]) {
+                            occupied[value.first] = true;
+                            ++nmemb;
+                        }
+                    }
+                } else {
+                    /// Make repeated calls to @c `emplace`.
+
+                    for (auto&& elem : std::forward <R>(range)) {
+                        emplace(elem);
+                    }
+                }
+            }
+
+#endif
+            
+            constexpr iterator erase(const const_iterator pos)
+            {
+                const auto next_pos = make_iterator(std::get <0>(*std::next(pos)));
 
                 assert(occupied[std::get <0>(*pos)] == true);
                 occupied[std::get <0>(*pos)] = false;
@@ -354,7 +422,7 @@ namespace dat
 
             constexpr mapped_type& at(const key_type& key)
             {
-                if (key >= occupied.size() || !occupied[key]) {
+                if (!contains(key)) {
                     throw std::out_of_range("Key not in table");
                 }
 
@@ -363,7 +431,7 @@ namespace dat
 
             constexpr const mapped_type& at(const key_type& key) const
             {
-                if (key >= occupied.size() || !occupied[key]) {
+                if (!contains(key)) {
                     throw std::out_of_range("Key not in table");
                 }
 
@@ -372,28 +440,42 @@ namespace dat
 
             constexpr iterator find(const key_type& key) noexcept
             {
-                if (key >= occupied.size() || !occupied[key])
-                    return end();
-
-                return make_iterator(key);
+                return contains(key) ? make_iterator(key) : end();
             }
 
             constexpr const_iterator find(const key_type& key) const noexcept
             {
-                if (key >= occupied.size() || !occupied[key])
-                    return cend();
-
-                return make_const_iterator(key);
+                return contains(key) ? make_const_iterator(key) : cend();
             }
 
             constexpr bool contains(const key_type& key) const noexcept
             {
-                return find(key) != cend();
+                return key < occupied.size() && occupied[key];
             }
 
             constexpr size_type count(const key_type& key) const noexcept
             {
                 return contains(key);
+            }
+    
+            constexpr std::pair <iterator, iterator>
+            equal_range(const key_type& key) noexcept
+            {
+                if (contains(key)) {
+                    return {make_iterator(key), std::next(make_iterator(key))};
+                } else {
+                    return {end(), end()};
+                }
+            }
+
+            constexpr std::pair <const_iterator, const_iterator>
+            equal_range(const key_type& key) const noexcept
+            {
+                if (contains(key)) {
+                    return {make_const_iterator(key), std::next(make_const_iterator(key))};
+                } else {
+                    return {cend(), cend()};
+                }
             }
     };
 
