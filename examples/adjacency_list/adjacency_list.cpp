@@ -20,7 +20,6 @@
  */
 
 #include "../containers/adapted_vector.h"
-#include "../containers/direct_address_table.h"
 
 #include "graph/adjacency_list.h"
 #include "graph/graph_algorithms.h"
@@ -54,7 +53,7 @@ void print(const auto& G)
 
 int main()
 {
-    graph::adjacency_list <unsigned, char, char, dat::direct_address_table, AdaptedVector> G = {
+    graph::adjacency_list <unsigned, char, char, std::unordered_map, AdaptedVector> G = {
         {
             { 1, 'A'},
             { 2, 'B'},

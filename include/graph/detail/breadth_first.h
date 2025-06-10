@@ -53,10 +53,11 @@ namespace graph
         typename graph_traits <G>::vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state(
-            std::from_range,
-            std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
-        ); // Initialise vertex states to unvisited.
+        > vertex_state;
+
+        for (const auto& v_value : g.vertices()) {
+            vertex_state.insert({std::get <0>(v_value), unvisited});
+        }
 
         queue.push(root);
 
