@@ -26,8 +26,7 @@ namespace graph
     ///        starting at a specified node and yields the keys to all
     ///        vertices encountered on the way.
     /// 
-    ///        Leaf nodes in the corresponding DFS tree of the graph are
-    ///        yielded exactly once. All other nodes are yielded twice: once
+    ///        All nodes (including leaf nodes) are yielded twice: once
     ///        when entering the subtree rooted at the node, and once
     ///        when exiting it.
     /// 
@@ -58,11 +57,10 @@ namespace graph
         typename graph_traits <G>::vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state;
-
-        for (const auto& v_value : g.vertices()) {
-            vertex_state.insert({std::get <0>(v_value), unvisited});
-        }
+        > vertex_state(
+            std::from_range,
+            std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
+        ); // Initialise vertex states to unvisited.
 
         stack.push(root);
 
@@ -103,8 +101,7 @@ namespace graph
     ///        starting at a specified vertex and yields the keys to all
     ///        vertices encountered on the way.
     /// 
-    ///        Leaf nodes in the corresponding DFS tree of the graph are
-    ///        yielded exactly once. All other nodes are yielded twice: once
+    ///        All nodes (including leaf nodes) are yielded twice: once
     ///        when entering the subtree rooted at the node, and once
     ///        when exiting it.
     /// 
@@ -161,11 +158,10 @@ namespace graph
         typename graph_traits <G>::vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state;
-
-        for (const auto& v_value : g.vertices()) {
-            vertex_state.insert({std::get <0>(v_value), unvisited});
-        }
+        > vertex_state(
+            std::from_range,
+            std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
+        ); // Initialise vertex states to unvisited.
 
         stack.push(root);
 
@@ -231,11 +227,10 @@ namespace graph
         typename graph_traits <G>::vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state;
-
-        for (const auto& v_value : g.vertices()) {
-            vertex_state.insert({std::get <0>(v_value), unvisited});
-        }
+        > vertex_state(
+            std::from_range,
+            std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
+        ); // Initialise vertex states to unvisited.
 
         stack.push(root);
 
