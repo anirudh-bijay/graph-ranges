@@ -42,6 +42,23 @@ class AdaptedVector : public std::vector <T, Alloc>
             auto it = this->end();
             return --it;
         }
+        
+        template <std::input_iterator It>
+        auto insert(It first, It last)
+        {
+            const auto insert_position = this->size();
+            this->append_range(std::ranges::subrange(first, last));
+            return this->begin() + insert_position;
+        }
+
+        template <std::ranges::input_range R>
+            requires std::convertible_to <std::ranges::range_reference_t <R>, T>
+        auto insert_range(R&& range)
+        {
+            const auto insert_position = this->size();
+            this->append_range(std::forward <R>(range));
+            return this->begin() + insert_position;
+        }
 
         template <class... Args>
         auto emplace(Args&&... args)
