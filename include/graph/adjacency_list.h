@@ -80,7 +80,7 @@ namespace graph
     /// 
     /// ----
     /// 
-    /// #### Introduction
+    /// ### Introduction
     /// 
     /// The adjacency list representation of a graph is a
     /// collection of lists mapped to individual vertices
@@ -89,7 +89,7 @@ namespace graph
     /// structure is augmented to store edge weights
     /// alongside the list entries.
     /// 
-    /// #### Implementation
+    /// ### Implementation
     /// 
     /// The implementation uses an associative container to
     /// map vertices to their corresponding lists of outedges.
@@ -120,13 +120,13 @@ namespace graph
     /// vertex are implemented as sequence containers as
     /// specified by the template template argument `eCont`.
     /// 
-    /// #### Containers
+    /// ### Containers
     /// 
     /// The template template arguments corresponding to
     /// the containers described above have certain constraints,
     /// as described below.
     /// 
-    /// `template <typename Key, typename T> class vCont`
+    /// #### `template <typename Key, typename T> class vCont`
     /// 
     /// - `Key` corresponds to the key type.
     /// 
@@ -135,8 +135,30 @@ namespace graph
     /// - Lookup should ideally be a constant- or
     ///   logarithmic-time operation.
     /// 
-    /// - Member functions `emplace`, `insert`, `erase`,
-    ///   and `find` should be
+    /// - The container should not permit duplicate keys.
+    /// 
+    /// #### Construction and assignment
+    /// 
+    /// - The container should be default-constructible.
+    /// 
+    /// - The container should be copy-constructible and
+    ///   copy-assignable.
+    /// 
+    /// - The container should be constructible from a
+    ///   pair of input iterators.
+    /// 
+    /// - The container should be constructible from an input
+    ///   range of @c `std::pair <Key, T>`. This constructor
+    ///   should take @c `std::from_range` as its first
+    ///   argument and the range as its second argument.
+    /// 
+    /// - The container should be constructible and assignable
+    ///   from an initializer list of @c `std::pair <Key, T>`.
+    /// 
+    /// #### Insertion
+    /// 
+    /// - Member functions `emplace`, `insert`, `try_emplace`,
+    ///   and `insert_range` should be
     ///   available with every instance of `vCont` instantiated
     ///   with any set of
     ///   syntactically correct template arguments. They should
@@ -144,17 +166,63 @@ namespace graph
     ///   semantics as in the C++ named requirement
     ///   @em [UnorderedAssociativeContainer](https://en.cppreference.com/w/cpp/named_req/UnorderedAssociativeContainer).
     /// 
-    /// - The container should be an iterable: calls to
-    ///   @c `std::ranges::begin` and @c `std::ranges::end`
-    ///   with a container instance as its only argument should
-    ///   be well-formed.
+    /// - Besides single-element insertion, the `insert` method
+    ///   should also accept a pair of input iterators defining a
+    ///   range of elements to insert.
     /// 
-    /// - Member function `insert` should return an @c `std::pair`
+    /// - Insertion methods should return an @c `std::pair`
     ///   consisting of an iterator to the inserted element and a
     ///   boolean indicating successful insertion, in that order;
     ///   the returned iterator should
     ///   be an instance of the type aliased by
     ///   @c `std::ranges::iterator_t`.
+    /// 
+    /// #### Erasure
+    /// 
+    /// - Member functions `erase` and `clear` should be
+    ///   available with every instance of `vCont` instantiated
+    ///   with any set of syntactically correct template
+    ///   arguments. They should take arguments and return
+    ///   values with the same semantics as in the C++ named
+    ///   requirement @em [UnorderedAssociativeContainer](https://en.cppreference.com/w/cpp/named_req/UnorderedAssociativeContainer).
+    /// 
+    /// - Erasure should be possible by key, by iterator, and
+    ///   by a pair of iterators defining a range.
+    /// 
+    /// - The function `erase_if` should be overloaded for the
+    ///   container and should be found by ADL.
+    /// 
+    /// #### Iteration
+    /// 
+    /// - The container should be an iterable: calls to
+    ///   @c `std::ranges::begin` and @c `std::ranges::end`
+    ///   with a container instance as their only argument should
+    ///   be well-formed.
+    /// 
+    /// #### Lookup
+    /// 
+    /// - Member function `find` and `operator[]` should be
+    ///   available with every instance of `vCont` instantiated
+    ///   with any set of syntactically correct template
+    ///   arguments. They should take arguments and return
+    ///   values with the same semantics as in the C++ named
+    ///   requirement @em [UnorderedAssociativeContainer](https://en.cppreference.com/w/cpp/named_req/UnorderedAssociativeContainer).
+    /// 
+    /// #### Capacity
+    /// 
+    /// - Member functions `empty`, `size`, and `max_size`
+    ///   should be available with every instance of `vCont`
+    ///   instantiated with any set of syntactically correct
+    ///   template arguments. They should take no arguments
+    ///   and return values with the same semantics as in the
+    ///   C++ named requirement @em [Container](https://en.cppreference.com/w/cpp/named_req/Container).
+    /// 
+    /// #### Swap
+    /// 
+    /// - The function `swap` should be overloaded for the
+    ///   container and should be found by ADL.
+    /// 
+    /// #### Other requirements
     /// 
     /// - @c `std::ranges::range_value_t <vCont <Key, T> >` should be
     ///   @em pair-like (as defined in the C++26 standard). If
@@ -162,37 +230,93 @@ namespace graph
     ///   @c `decltype(std::get <0>(v))` should be @c `Key` and
     ///   @c `decltype(std::get <1>(v))` should be @c `T`.
     /// 
-    /// `template <typename T> class eCont`
+    /// #### `template <typename T> class eCont`
     /// 
     /// - `T` corresponds to the value type.
     /// 
     /// - Iteration over the entire container should take time
     ///   linear in the size of the container.
+    ///
+    /// #### Construction and assignment
     /// 
-    /// - Member functions `emplace`, `insert`, `erase`,
-    ///   and `find` should be
+    /// - The container should be default-constructible.
+    /// 
+    /// - The container should be copy-constructible and
+    ///   copy-assignable.
+    /// 
+    /// - The container should be constructible from a
+    ///   pair of input iterators.
+    /// 
+    /// - The container should be constructible from an input
+    ///   range of @c `T`. This constructor
+    ///   should take @c `std::from_range` as its first
+    ///   argument and the range as its second argument.
+    /// 
+    /// - The container should be constructible and assignable
+    ///   from an initializer list of @c `T`.
+    /// 
+    /// #### Insertion
+    /// 
+    /// - Member functions `emplace`, `insert`, and `insert_range`
+    ///   should be available with every instance of 
+    ///   `eCont` instantiated with any set of
+    ///   syntactically correct template arguments. They should
+    ///   take arguments corresponding to the value(s) to insert
+    ///   and return an iterator to the inserted element
+    ///   (the first element in case of a range). The element
+    ///   should preferably be inserted at a position that makes
+    ///   the insertion as efficient as possible.
+    /// 
+    /// - Besides single-element insertion, the `insert` method
+    ///   should also accept a pair of input iterators defining a
+    ///   range of elements to insert.
+    /// 
+    /// - Insertion methods should return an iterator to the
+    ///   inserted element. The iterator should be an instance
+    ///   of the type aliased by @c `std::ranges::iterator_t`.
+    /// 
+    /// #### Erasure
+    /// 
+    /// - Member functions `erase` and `clear` should be
     ///   available with every instance of `eCont` instantiated
-    ///   with any set of
-    ///   syntactically correct template arguments.
+    ///   with any set of syntactically correct template
+    ///   arguments. They should take arguments and return
+    ///   values with the same semantics as in the C++ named
+    ///   requirement @em [SequenceContainer](https://en.cppreference.com/w/cpp/named_req/SequenceContainer).
     /// 
-    /// - ADL should be able to find an overload of `erase_if`
-    ///   taking as its arguments
-    ///   an instance of `eCont` and a lambda.
+    /// - Erasure should be possible by iterator and
+    ///   by a pair of iterators defining a range.
+    /// 
+    /// - The function `erase_if` should be overloaded for the
+    ///   container and should be found by ADL.
+    /// 
+    /// #### Iteration
     /// 
     /// - The container should be an iterable: calls to
     ///   @c `std::ranges::begin` and @c `std::ranges::end`
-    ///   with a container instance as its only argument should
+    ///   with a container instance as their only argument should
     ///   be well-formed.
     /// 
-    /// - Member function `insert` should return an iterator
-    ///   to the inserted element; the returned iterator should
-    ///   be an instance of the type aliased by
-    ///   @c `std::ranges::iterator_t`.
+    /// #### Capacity
+    /// 
+    /// - Member functions `empty`, `size`, and `max_size`
+    ///   should be available with every instance of `eCont`
+    ///   instantiated with any set of syntactically correct
+    ///   template arguments. They should take no arguments
+    ///   and return values with the same semantics as in the
+    ///   C++ named requirement @em [Container](https://en.cppreference.com/w/cpp/named_req/Container).
+    /// 
+    /// #### Swap
+    /// 
+    /// - The function `swap` should be overloaded for the
+    ///   container and should be found by ADL.
+    /// 
+    /// #### Other requirements
     /// 
     /// - @c `std::ranges::range_value_t <eCont <T> >` should
     ///   alias @c `T`.
     /// 
-    /// #### Undirected Graphs
+    /// ### Undirected Graphs
     /// 
     /// A directed edge is represented in an adjacency list by
     /// an entry of the head vertex in the list of direct successors
