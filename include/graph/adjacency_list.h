@@ -8,12 +8,6 @@
 
 #pragma once
 
-#if __cpp_lib_ranges < 202211L
-
-#warning "This header requires support for C++23 <ranges>."
-
-#endif
-
 #include "detail/utils.h"
 #include "graph_traits.h"
 
@@ -27,6 +21,10 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
+#if __cpp_lib_ranges < 202211L
+#warning This header requires support for C++23 <ranges>.
+#endif
 
 namespace graph
 {

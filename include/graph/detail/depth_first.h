@@ -7,18 +7,20 @@
 
 #pragma once
 
-#if __cpp_impl_coroutine < 201902L && __cpp_lib_coroutine < 201902L
-
-#warning This header requires support for C++ coroutines.
-
-#endif
-
 #include "graph/graph_traits.h"
 
 #include <generator>
 #include <ranges>
 #include <stack>
 #include <vector>
+
+#if __cpp_impl_coroutine < 201902L
+#warning This header requires support for C++ coroutines.
+#endif
+
+#if __cpp_lib_ranges < 202211L
+#warning This header requires support for C++23 <ranges>.
+#endif
 
 namespace graph
 {
@@ -66,13 +68,12 @@ namespace graph
 
         do {
             const auto& u = stack.top();
-            auto& vertex_state_ref = vertex_state[u];
 
-            switch (vertex_state[u]) {
+            switch (auto& state_ref = vertex_state[u]; state_ref) {
                 case unvisited:
                     co_yield u;
 
-                    vertex_state_ref = inside_subtree;
+                    state_ref = inside_subtree;
 
                     for (const auto& v : g.successors(u)) {
                         if (vertex_state[v] == unvisited) {
@@ -86,7 +87,7 @@ namespace graph
                     co_yield u;
                     stack.pop(); // Scheduled after yielding to prevent a dangling reference.
 
-                    vertex_state_ref = subtree_visited;
+                    state_ref = subtree_visited;
                     break;
 
                 default:
@@ -167,13 +168,12 @@ namespace graph
 
         do {
             const auto& u = stack.top();
-            auto& vertex_state_ref = vertex_state[u];
 
-            switch (vertex_state[u]) {
+            switch (auto& state_ref = vertex_state[u]; state_ref) {
                 case unvisited:
                     co_yield u;
 
-                    vertex_state_ref = visited;
+                    state_ref = visited;
 
                     for (const auto& v : g.successors(u)) {
                         if (vertex_state[v] == unvisited) {
@@ -236,11 +236,10 @@ namespace graph
 
         do {
             const auto& u = stack.top();
-            auto& vertex_state_ref = vertex_state[u];
 
-            switch (vertex_state[u]) {
+            switch (auto& state_ref = vertex_state[u]; state_ref) {
                 case unvisited:
-                    vertex_state_ref = inside_subtree;
+                    state_ref = inside_subtree;
 
                     for (const auto& v : g.successors(u)) {
                         if (vertex_state[v] == unvisited) {
@@ -254,7 +253,7 @@ namespace graph
                     co_yield u;
                     stack.pop(); // Scheduled after yielding to prevent a dangling reference.
 
-                    vertex_state_ref = subtree_visited;
+                    state_ref = subtree_visited;
                     break;
 
                 default:

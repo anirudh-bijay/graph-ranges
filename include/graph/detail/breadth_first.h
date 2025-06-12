@@ -6,18 +6,20 @@
 
 #pragma once
 
-#if __cpp_impl_coroutine < 201902L && __cpp_lib_coroutine < 201902L
-
-#warning This header requires support for C++ coroutines.
-
-#endif
-
 #include "graph/graph_traits.h"
 
 #include <generator>
 #include <queue>
 #include <ranges>
 #include <vector>
+
+#if __cpp_impl_coroutine < 201902L
+#warning This header requires support for C++ coroutines.
+#endif
+
+#if __cpp_lib_ranges < 202211L
+#warning This header requires support for C++23 <ranges>.
+#endif
 
 namespace graph
 {
@@ -59,6 +61,7 @@ namespace graph
         ); // Initialise vertex states to unvisited.
 
         queue.push(root);
+        vertex_state[root] = visited;
 
         do {
             const auto u = std::move(queue.front()); // Copy to avoid dangling reference.

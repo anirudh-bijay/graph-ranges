@@ -6,16 +6,14 @@
 
 #pragma once
 
-#if __cpp_lib_ranges < 202211L
-
-#warning "This header requires support for C++23 <ranges>."
-
-#endif
-
 #include <concepts>
 #include <iterator>
 #include <type_traits>
 #include <ranges>
+
+#if __cpp_lib_ranges < 202211L
+#warning "This header requires support for C++23 <ranges>."
+#endif
 
 namespace graph
 {
