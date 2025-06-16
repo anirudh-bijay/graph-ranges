@@ -288,6 +288,7 @@ namespace graph
 
         protected:
             table_type adj{};
+            size_type edge_count = 0;
 
         public:
             template <std::ranges::view V>
@@ -357,8 +358,8 @@ namespace graph
                 for (auto it = std::ranges::begin(vertex_set); it != std::ranges::end(vertex_set); ++it) {
                     /// @note @c `std::erase_if` should be found by ADL;
                     ///       hence, @c `erase_if` is used unqualified.
-                    erase_if(std::get <1>(std::get <1>(*it.base())), [&v_key](const auto& elem) {
-                        return elem.first == v_key;
+                    edge_count -= erase_if(std::get <1>(std::get <1>(*it.base())), [&v_key](const auto& elem) {
+                        return std::get <0>(elem) == v_key;
                     });
                 }
             }
@@ -373,8 +374,8 @@ namespace graph
                 for (auto it = std::ranges::begin(vertex_set); it != std::ranges::end(vertex_set); ++it) {
                     /// @note @c `std::erase_if` should be found by ADL;
                     ///       hence, @c `erase_if` is used unqualified.
-                    erase_if(std::get <1>(std::get <1>(*it.base())), [&v_key](const auto& elem) {
-                        return elem.first == v_key;
+                    edge_count -= erase_if(std::get <1>(std::get <1>(*it.base())), [&v_key](const auto& elem) {
+                        return std::get <0>(elem) == v_key;
                     });
                 }
             }
@@ -387,7 +388,9 @@ namespace graph
                 if (row_iter == std::ranges::end(adj)) [[unlikely]]
                     throw std::out_of_range("The vertex key for the tail does not exist in the graph");
 
-                return outedge_view_iterator_t{row_iter, std::get <1>(std::get <1>(*row_iter)).emplace(head_key, e_data)};
+                const auto it = outedge_view_iterator_t{row_iter, std::get <1>(std::get <1>(*row_iter)).emplace(head_key, e_data)};
+                ++edge_count; // Increment the edge count. Done after insertion for strong exception guarantee.
+                return it;
             }
 
             constexpr auto
@@ -398,7 +401,9 @@ namespace graph
                 if (row_iter == std::ranges::end(adj)) [[unlikely]]
                     throw std::out_of_range("The vertex key for the tail does not exist in the graph");
 
-                return outedge_view_iterator_t{row_iter, std::get <1>(std::get <1>(*row_iter)).emplace(head_key, std::move_if_noexcept(e_data))};
+                const auto it = outedge_view_iterator_t{row_iter, std::get <1>(std::get <1>(*row_iter)).emplace(head_key, std::move(e_data))};
+                ++edge_count; // Increment the edge count. Done after insertion for strong exception guarantee.
+                return it;
             }
 
             constexpr auto insert_edge(
@@ -407,10 +412,12 @@ namespace graph
                 const eTp& e_data
             )
             {
-                return outedge_view_iterator_t{
+                const auto it = outedge_view_iterator_t{
                     tail_iter.base(),
                     std::get <1>(std::get <1>(*tail_iter)).emplace(std::get <0>(*std::move_if_noexcept(head_iter)), e_data)
                 };
+                ++edge_count; // Increment the edge count. Done after insertion for strong exception guarantee.
+                return it;
             }
 
             constexpr auto insert_edge(
@@ -419,10 +426,12 @@ namespace graph
                 eTp&& e_data
             )
             {
-                return outedge_view_iterator_t{
+                const auto it = outedge_view_iterator_t{
                     tail_iter,
                     std::get <1>(std::get <1>(*tail_iter)).emplace(std::get <0>(*std::move_if_noexcept(head_iter)), std::move_if_noexcept(e_data))
                 };
+                ++edge_count; // Increment the edge count. Done after insertion for strong exception guarantee.
+                return it;
             }
 
             constexpr void erase_edge(outedge_view_iterator_t e_iter)
@@ -437,6 +446,7 @@ namespace graph
                 const auto& row_iter = e_iter.base().first;
 
                 std::get <1>(std::get <1>(*row_iter)).erase(/* Access edge iter */ e_iter.base().second);
+                --edge_count; // Decrement the edge count. Done after erasure for strong exception guarantee.
             }
 
             constexpr size_type erase_edges(const vId& tail_key, const vId& head_key)
@@ -445,7 +455,7 @@ namespace graph
 
                 /// @note @c `std::erase_if` should be found by ADL;
                 ///       hence, @c `erase_if` is used unqualified.
-                return erase_if(
+                return edge_count -= erase_if(
                     std::get <1>(std::get <1>(*adj.find(tail_key))),
                     [&head_key](const auto& elem) -> bool {
                         return elem.first == head_key;
@@ -464,7 +474,7 @@ namespace graph
 
                 /// @note @c `std::erase_if` should be found by ADL;
                 ///       hence, @c `erase_if` is used unqualified.
-                return erase_if(
+                return edge_count -= erase_if(
                     std::get <0>(std::get <0>(std::move_if_noexcept(tail_iter).base())),
                     [&head_key](const auto& elem) -> bool {
                         return elem.first == head_key;
@@ -638,6 +648,37 @@ namespace graph
             constexpr auto find_vertex(const vId& node_key) const
             {
                 return vertex_view_const_iterator_t{adj.find(node_key)};
+            }
+
+            /// @brief Returns the number of @b vertices in the graph.
+            /// 
+            /// @note This function is not intended for
+            ///       bounds checking or similar operations that use
+            ///       range sizes. To determine the size of a range
+            ///       being iterated over, use `std::ranges::size` on
+            ///       the range itself.
+            [[nodiscard]]
+            constexpr size_type order() const noexcept(noexcept(std::ranges::size(adj)))
+            {
+                return std::ranges::size(adj);
+            }
+
+            /// @brief Returns the number of @b edges in the graph.
+            /// 
+            /// @note This function is not intended for
+            ///       bounds checking or similar operations that use
+            ///       range sizes. To determine the size of a range
+            ///       being iterated over, use `std::ranges::size` on
+            ///       the range itself.
+            /// 
+            ///       The intention is to allow the user or algorithms
+            ///       to draw quick conclusions based on the number of
+            ///       edges in the graph, such as whether the graph is
+            ///       disconnected, cyclic, or sparse.
+            [[nodiscard]]
+            constexpr size_type size() const noexcept
+            {
+                return edge_count;
             }
     };
 
