@@ -267,7 +267,7 @@ namespace graph
         private:
             using row_type = std::pair <vTp, eCont <std::pair <vId, eTp> > >;
             using table_type = vCont <vId, row_type>;
-            using size_type = std::conditional <
+            using size_type = std::conditional_t <
                 std::numeric_limits <
                     std::ranges::range_size_t <table_type>
                 >::max() < std::numeric_limits <
@@ -276,7 +276,7 @@ namespace graph
                 std::ranges::range_size_t <table_type>,
                 std::ranges::range_size_t <std::tuple_element_t <1, row_type> >
             >;
-            using difference_type = std::conditional <
+            using difference_type = std::conditional_t <
                 std::numeric_limits <
                     std::ranges::range_difference_t <table_type>
                 >::max() < std::numeric_limits <
@@ -288,7 +288,7 @@ namespace graph
 
         protected:
             table_type adj{};
-            size_type edge_count = 0;
+            size_type edge_count = {};
 
         public:
             template <std::ranges::view V>
