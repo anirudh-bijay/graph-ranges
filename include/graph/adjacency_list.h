@@ -352,23 +352,16 @@ namespace graph
 
             constexpr void erase_vertex(const vId& v_key)
             {
-                adj.erase(v_key);
-                
-                auto vertex_set = vertices();
-                for (auto it = std::ranges::begin(vertex_set); it != std::ranges::end(vertex_set); ++it) {
-                    /// @note @c `std::erase_if` should be found by ADL;
-                    ///       hence, @c `erase_if` is used unqualified.
-                    edge_count -= erase_if(std::get <1>(std::get <1>(*it.base())), [&v_key](const auto& elem) {
-                        return std::get <0>(elem) == v_key;
-                    });
-                }
+                erase_vertex(find_vertex(v_key));
             }
 
             constexpr void erase_vertex(const vertex_view_iterator_t v_iter)
             {
+                const auto v_key = std::get <0>(*v_iter);
+                
+                edge_count -= std::ranges::size(outedges(v_iter));
                 adj.erase(v_iter.base());
                 
-                const auto& v_key = std::get <0>(v_iter);
                 auto vertex_set = vertices();
 
                 for (auto it = std::ranges::begin(vertex_set); it != std::ranges::end(vertex_set); ++it) {
@@ -414,7 +407,7 @@ namespace graph
             {
                 const auto it = outedge_view_iterator_t{
                     tail_iter.base(),
-                    std::get <1>(std::get <1>(*tail_iter)).emplace(std::get <0>(*std::move_if_noexcept(head_iter)), e_data)
+                    std::get <1>(std::get <1>(*tail_iter.base())).emplace(std::get <0>(*std::move_if_noexcept(head_iter)), e_data)
                 };
                 ++edge_count; // Increment the edge count. Done after insertion for strong exception guarantee.
                 return it;
@@ -428,7 +421,7 @@ namespace graph
             {
                 const auto it = outedge_view_iterator_t{
                     tail_iter,
-                    std::get <1>(std::get <1>(*tail_iter)).emplace(std::get <0>(*std::move_if_noexcept(head_iter)), std::move_if_noexcept(e_data))
+                    std::get <1>(std::get <1>(*tail_iter.base())).emplace(std::get <0>(*std::move_if_noexcept(head_iter)), std::move(e_data))
                 };
                 ++edge_count; // Increment the edge count. Done after insertion for strong exception guarantee.
                 return it;
@@ -633,7 +626,7 @@ namespace graph
             }
 
             [[nodiscard]]
-            constexpr bool empty() const noexcept(noexcept(adj.empty()))
+            constexpr bool empty() const noexcept(noexcept(std::ranges::empty(adj)))
             {
                 return std::ranges::empty(adj);
             }
@@ -650,7 +643,7 @@ namespace graph
                 return vertex_view_const_iterator_t{adj.find(node_key)};
             }
 
-            /// @brief Returns the number of @b vertices in the graph.
+            /// @brief Return the number of @b vertices in the graph.
             /// 
             /// @note This function is not intended for
             ///       bounds checking or similar operations that use
@@ -663,7 +656,7 @@ namespace graph
                 return std::ranges::size(adj);
             }
 
-            /// @brief Returns the number of @b edges in the graph.
+            /// @brief Return the number of @b edges in the graph.
             /// 
             /// @note This function is not intended for
             ///       bounds checking or similar operations that use
