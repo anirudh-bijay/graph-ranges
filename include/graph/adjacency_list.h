@@ -4,6 +4,9 @@
  * Generic adjacency list implementation of graphs for fast lookup
  * of nodes and iteration over neighbours/successors/outedges at the
  * cost of slower edge lookup.
+ * 
+ * @deprecated This header is being replaced by
+ * @c graph/detail/adjacency_list/directed.h.
  */
 
 #pragma once
@@ -335,6 +338,15 @@ namespace graph
                 while (first != last) {
                     insert_vertex(std::get <0>(*first), std::get <1>(*first));
                     ++first;
+                }
+            }
+
+            template <std::ranges::input_range R>
+                requires std::convertible_to <std::ranges::range_reference_t <R>, std::pair <vId, vTp> >
+            constexpr adjacency_list(R&& v_range)
+            {
+                for (const auto& elem : v_range) {
+                    insert_vertex(std::get <0>(elem), std::get <1>(elem));
                 }
             }
 
