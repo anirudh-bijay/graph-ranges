@@ -56,13 +56,21 @@ namespace graph
 
         std::stack <typename graph_traits <G>::vertex_key_type> stack;
 
-        typename graph_traits <G>::vertex_container <
+        typename graph_traits <G>::template vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state(
+        > vertex_state
+#ifndef __clang__
+        (
             std::from_range,
             std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
         ); // Initialise vertex states to unvisited.
+#else   /** Clang does not support @c `std::from_range` yet. */
+        ;
+        for (const auto& v : g.vertices() | std::views::keys) {
+            vertex_state.emplace(v, unvisited);
+        }
+#endif
 
         stack.push(root);
 
@@ -156,13 +164,21 @@ namespace graph
 
         std::stack <typename graph_traits <G>::vertex_key_type> stack;
 
-        typename graph_traits <G>::vertex_container <
+        typename graph_traits <G>::template vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state(
+        > vertex_state
+#ifndef __clang__
+        (
             std::from_range,
             std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
         ); // Initialise vertex states to unvisited.
+#else   /** Clang does not support @c `std::from_range` yet. */
+        ;
+        for (const auto& v : g.vertices() | std::views::keys) {
+            vertex_state.emplace(v, unvisited);
+        }
+#endif
 
         stack.push(root);
 
@@ -224,13 +240,21 @@ namespace graph
 
         std::stack <typename graph_traits <G>::vertex_key_type> stack;
 
-        typename graph_traits <G>::vertex_container <
+        typename graph_traits <G>::template vertex_container <
             typename graph_traits <G>::vertex_key_type,
             enum State
-        > vertex_state(
+        > vertex_state
+#ifndef __clang__
+        (
             std::from_range,
             std::views::zip(g.vertices() | std::views::keys, std::views::repeat(unvisited))
         ); // Initialise vertex states to unvisited.
+#else   /** Clang does not support @c `std::from_range` yet. */
+        ;
+        for (const auto& v : g.vertices() | std::views::keys) {
+            vertex_state.emplace(v, unvisited);
+        }
+#endif
 
         stack.push(root);
 
