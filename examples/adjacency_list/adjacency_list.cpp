@@ -21,7 +21,7 @@
 
 #include "../containers/adapted_vector.h"
 
-#include "graph/adjacency_list.h"
+#include "graph/graph.h"
 #include "graph/graph_algorithms.h"
 #include "graph/graph_traits.h"
 
@@ -53,7 +53,10 @@ void print(const auto& G)
 
 int main()
 {
-    graph::adjacency_list <unsigned, char, char, std::unordered_map, AdaptedVector> G = {
+    graph::graph <
+        graph::adjacency_list_policy <unsigned, char, char, std::unordered_map, AdaptedVector>
+        { .is_directed = true }
+    > G = {
         {
             { 1, 'A'},
             { 2, 'B'},
