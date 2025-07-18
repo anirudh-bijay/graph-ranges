@@ -31,3 +31,7 @@ Currently, this library is only expositional. It implements only an
 adjacency list graph representation and provides algorithms only for
 depth-first and breadth-first traversals. However, it already
 demonstrates the features described above.
+
+## Examples
+
+See the [`examples`](examples) directory for usage examples.
