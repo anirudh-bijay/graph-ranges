@@ -12,11 +12,5 @@ namespace graph
 {
     template <auto Policy>
     class graph;
-
-    template <auto Policy>
-    class directed_graph;
-
-    template <auto Policy>
-    class undirected_graph;
     
 } // namespace graph

@@ -33,9 +33,6 @@ namespace graph
 
     template <auto Policy>
     class graph;
-
-    template <auto Policy>
-    class directed_graph;
     
 } // namespace graph
 
@@ -67,39 +64,10 @@ template <
     template <typename Key, typename T> class vCont,
     template <typename T> class eCont,
     graph::adjacency_list_policy <vId, vTp, eTp, vCont, eCont> Policy
-> requires (Policy.is_directed)
-class graph::graph <Policy> : public ::graph::directed_graph <Policy>
-{
-    using Class = graph;                                // The class.
-    using Base  = ::graph::directed_graph <Policy>;     // The base class.
-
-public:
-    using Base::Base;
-};
-
-template <
-    typename vId,
-    typename vTp,
-    typename eTp,
-    template <typename Key, typename T> class vCont,
-    template <typename T> class eCont,
-    graph::adjacency_list_policy <vId, vTp, eTp, vCont, eCont> Policy
-> requires (Policy.is_directed)
-struct graph::graph_traits <::graph::graph <Policy> >
-    : public ::graph::graph_traits <::graph::directed_graph <Policy> >
-{};
-
-template <
-    typename vId,
-    typename vTp,
-    typename eTp,
-    template <typename Key, typename T> class vCont,
-    template <typename T> class eCont,
-    graph::adjacency_list_policy <vId, vTp, eTp, vCont, eCont> Policy
 > requires (Policy.is_directed && Policy.is_multigraph && !Policy.support_inedge_iteration)
-class graph::directed_graph <Policy>
+class graph::graph <Policy>
 {
-    using Class = directed_graph;                       // The class.
+    using Class = graph;                       // The class.
 
     friend struct ::graph::graph_traits <Class>;
 
@@ -159,12 +127,12 @@ private:
 public:
     /// @section Constructors
 
-    constexpr directed_graph() = default;
+    constexpr graph() = default;
 
-    constexpr directed_graph(
+    constexpr graph(
         std::initializer_list <std::tuple <vId, vTp> > v_set,
         std::initializer_list <std::tuple <vId, vId, eTp> > e_set = {}
-    ) : directed_graph(v_set | std::views::all, e_set | std::views::all) {}
+    ) : graph(v_set | std::views::all, e_set | std::views::all) {}
     
     template <
         std::ranges::input_range VertexRange,
@@ -172,7 +140,7 @@ public:
     >
         requires std::convertible_to <std::ranges::range_reference_t <VertexRange>, std::tuple <vId, vTp> >
         && std::convertible_to <std::ranges::range_reference_t <EdgeRange>, std::tuple <vId, vId, eTp> >
-    constexpr directed_graph(VertexRange&& v_range, EdgeRange&& e_range = {})
+    constexpr graph(VertexRange&& v_range, EdgeRange&& e_range = {})
     {
         for (const auto& elem : v_range) {
             emplace_vertex(std::get <0>(elem), std::get <1>(elem));
@@ -583,7 +551,7 @@ class graph::detail::adjacency_list::vertex_view <Policy, V>::iterator_impl
 {
     using Class = iterator_impl;                        // The class.
 
-    friend class ::graph::directed_graph <Policy>;
+    friend class ::graph::graph <Policy>;
 
     template <bool OtherConst>
     friend class detail::adjacency_list::vertex_view <Policy, V>::sentinel_impl;
@@ -778,7 +746,7 @@ class graph::detail::adjacency_list::vertex_view <Policy, V>::sentinel_impl
 {
     using Class = sentinel_impl;                         // The class.
 
-    friend class ::graph::directed_graph <Policy>;
+    friend class ::graph::graph <Policy>;
 
 private:
     using base_sentinel_type = std::ranges::sentinel_t <std::conditional_t <Const, const V, V> >;
@@ -922,7 +890,7 @@ class graph::detail::adjacency_list::outedge_view <Policy, Iter>::iterator_impl
 {
     using Class = iterator_impl;                        // The class.
 
-    friend class ::graph::directed_graph <Policy>;
+    friend class ::graph::graph <Policy>;
 
     template <bool OtherConst>
     friend class detail::adjacency_list::outedge_view <Policy, Iter>::sentinel_impl;
@@ -1132,7 +1100,7 @@ class graph::detail::adjacency_list::outedge_view <Policy, Iter>::sentinel_impl
 {
     using Class = sentinel_impl;                         // The class.
 
-    friend class ::graph::directed_graph <Policy>;
+    friend class ::graph::graph <Policy>;
 
 private:
     using V = detail::views::all_t <decltype(std::get <1>(std::get <1>(*std::declval <Iter>())))>;
@@ -1244,7 +1212,7 @@ template <
     template <typename T> class eCont,
     graph::adjacency_list_policy <vId, vTp, eTp, vCont, eCont> Policy
 > requires (Policy.is_directed && !Policy.support_inedge_iteration)
-struct graph::graph_traits <::graph::directed_graph <Policy> >
+struct graph::graph_traits <::graph::graph <Policy> >
 {
     using policy_t = decltype(Policy);
     static constexpr policy_t policy = Policy;
@@ -1257,13 +1225,13 @@ struct graph::graph_traits <::graph::directed_graph <Policy> >
     using vertex_value_type     = std::tuple <const vId, vTp>;
     using edge_type             = eTp;
 
-    using vertex_iterator           = ::graph::directed_graph <Policy>::vertex_view_iterator_t;
-    using const_vertex_iterator     = ::graph::directed_graph <Policy>::vertex_view_const_iterator_t;
-    using outedge_iterator          = ::graph::directed_graph <Policy>::outedge_view_iterator_t;
-    using const_outedge_iterator    = ::graph::directed_graph <Policy>::outedge_view_const_iterator_t;
+    using vertex_iterator           = ::graph::graph <Policy>::vertex_view_iterator_t;
+    using const_vertex_iterator     = ::graph::graph <Policy>::vertex_view_const_iterator_t;
+    using outedge_iterator          = ::graph::graph <Policy>::outedge_view_iterator_t;
+    using const_outedge_iterator    = ::graph::graph <Policy>::outedge_view_const_iterator_t;
 
-    using size_type         = ::graph::directed_graph <Policy>::size_type;
-    using difference_type   = ::graph::directed_graph <Policy>::difference_type;
+    using size_type         = ::graph::graph <Policy>::size_type;
+    using difference_type   = ::graph::graph <Policy>::difference_type;
 };
 
 #pragma endregion   Graph traits
