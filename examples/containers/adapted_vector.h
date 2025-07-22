@@ -13,10 +13,10 @@
 #include <utility>
 #include <vector>
 
-template <typename T, class Alloc = std::allocator <T> >
-class AdaptedVector : public std::vector <T, Alloc>
+template <typename T, class Allocator = std::allocator <T> >
+class AdaptedVector : public std::vector <T, Allocator>
 {
-    using Base = std::vector <T, Alloc>;
+    using Base = std::vector <T, Allocator>;
 
     public:
         using Base::Base;

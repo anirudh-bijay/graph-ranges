@@ -19,11 +19,10 @@
  * drop-in replacement.
  */
 
-#include "../containers/adapted_vector.h"
-
-#include "graph/graph.h"
-#include "graph/graph_algorithms.h"
-#include "graph/graph_traits.h"
+#include <graph/graph.h>
+#include <graph/graph_algorithms.h>
+#include <graph/graph_traits.h>
+#include <graph/sequence_containers.h>
 
 #include <iostream>
 #include <unordered_map>
@@ -54,7 +53,7 @@ void print(const auto& G)
 int main()
 {
     graph::graph <
-        graph::adjacency_list_policy <unsigned, char, char, std::unordered_map, AdaptedVector>
+        graph::adjacency_list_policy <unsigned, char, char, std::unordered_map, graph::vector>
         { .is_directed = true }
     > G = {
         {
