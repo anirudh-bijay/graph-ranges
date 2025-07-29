@@ -1,5 +1,5 @@
 /**
- * @file examples/containers/adapted_vector.h
+ * @file tests/adjacency_list/adapted_vector.h
  * 
  * Wrapper around @c `std::vector` providing an interface
  * compatible with @c `graph::adjacency_list` as an edge
@@ -29,14 +29,14 @@ class AdaptedVector : public std::vector <T, Allocator>
             : Base{std::move(base)}
         {}
 
-        auto insert(const std::ranges::range_value_t <Base>& elem)
+        constexpr auto insert(const std::ranges::range_value_t <Base>& elem)
         {
             this->push_back(elem);
             auto it = this->end();
             return --it;
         }
 
-        auto insert(std::ranges::range_value_t <Base>&& elem)
+        constexpr auto insert(std::ranges::range_value_t <Base>&& elem)
         {
             this->emplace_back(std::move(elem));
             auto it = this->end();
@@ -44,7 +44,7 @@ class AdaptedVector : public std::vector <T, Allocator>
         }
         
         template <std::input_iterator It>
-        auto insert(It first, It last)
+        constexpr auto insert(It first, It last)
         {
             const auto insert_position = this->size();
             this->append_range(std::ranges::subrange(first, last));
@@ -53,7 +53,7 @@ class AdaptedVector : public std::vector <T, Allocator>
 
         template <std::ranges::input_range R>
             requires std::convertible_to <std::ranges::range_reference_t <R>, T>
-        auto insert_range(R&& range)
+        constexpr auto insert_range(R&& range)
         {
             const auto insert_position = this->size();
             this->append_range(std::forward <R>(range));
@@ -61,7 +61,7 @@ class AdaptedVector : public std::vector <T, Allocator>
         }
 
         template <class... Args>
-        auto emplace(Args&&... args)
+        constexpr auto emplace(Args&&... args)
         {
             this->emplace_back(std::forward <Args>(args)...);
             auto it = this->end();
